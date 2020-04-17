@@ -1,0 +1,27 @@
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+alias jupyter-notebook="~/.local/bin/jupyter-notebook --no-browser"
+
+surface() {
+	sudo mount -t drvfs '\\L054716565053\c' /mnt/surface
+	cd /mnt/surface	
+}
+
+ecp() {
+	surface;
+	cd dev/ecp;
+}
+
+hack() {
+	cd /c/dev;
+}
+
+youl() {
+	cd /c/dev/youl;
+}
+
+ss() {
+	sudo service postgresql restart && sudo service redis-server restart;
+}
