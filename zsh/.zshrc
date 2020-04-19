@@ -108,3 +108,8 @@ source $HOME/.variables
 
 # aliases
 source $HOME/.aliases
+
+# configs
+/usr/bin/keychain --nogui $HOME/.ssh/id_rsa_github
+source $HOME/.keychain/$HOSTNAME-sh
+

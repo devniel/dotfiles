@@ -4,16 +4,6 @@ export NVM_DIR="$HOME/.nvm"
 
 alias jupyter-notebook="~/.local/bin/jupyter-notebook --no-browser"
 
-surface() {
-	sudo mount -t drvfs '\\L054716565053\c' /mnt/surface
-	cd /mnt/surface	
-}
-
-ecp() {
-	surface;
-	cd dev/ecp;
-}
-
 hack() {
 	cd /c/dev;
 }
