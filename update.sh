@@ -15,3 +15,6 @@ cp $HOME/.config/polybar/grayblocks/colors.ini ./ubuntu/polybar/grayblocks/color
 cp $HOME/.config/polybar/grayblocks/scripts/rofi/colors.rasi ./ubuntu/polybar/grayblocks/scripts/rofi/colors.rasi
 cp $HOME/.config/picom/picom.conf ./ubuntu/picom/picom.conf
 cp $HOME/.config/nitrogen/nitrogen.cfg ./ubuntu/nitrogen/nitrogen.cfg
+# right-side monitor split (black left strip) + login autostart
+cp $HOME/.local/bin/right-screen.sh ./ubuntu/.local/bin/right-screen.sh
+cp $HOME/.xsessionrc ./ubuntu/.xsessionrc
