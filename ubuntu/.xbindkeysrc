@@ -1,0 +1,11 @@
+"bash ~/.config/i3/ws-next.sh"
+ control+alt+Right
+
+"bash ~/.config/i3/ws-next.sh"
+ control+Right
+
+"bash ~/.config/i3/ws-prev.sh" 
+ control+alt+Left
+
+"bash ~/.config/i3/ws-prev.sh"
+ control+Left

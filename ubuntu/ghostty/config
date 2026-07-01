@@ -1,0 +1,5 @@
+font-size = 16
+keybind = ctrl+alt+right=unbind
+keybind = ctrl+alt+left=unbind
+window-decoration = false
+gtk-titlebar = false
