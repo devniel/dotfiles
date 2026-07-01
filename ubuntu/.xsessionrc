@@ -1,0 +1,8 @@
+# Runs at login (sourced by /etc/X11/Xsession.d/40x11-common_xsessionrc), before i3.
+# Carve the right-side monitor and paint the background black.
+[ -x "$HOME/.local/bin/right-screen.sh" ] && "$HOME/.local/bin/right-screen.sh"
+
+# Solid-black wallpaper. Generate the image on first use so this is self-contained.
+BG="$HOME/.local/share/black-bg.ppm"
+[ -f "$BG" ] || { mkdir -p "$HOME/.local/share"; { printf 'P6\n16 16\n255\n'; head -c 768 /dev/zero; } > "$BG"; }
+feh --no-fehbg --bg-fill "$BG" 2>/dev/null
