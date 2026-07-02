@@ -183,7 +183,7 @@ bindsym $mod+r mode "resize"
 #        status_command i3status
 #}
 
-exec_always --no-startup-id ~/.config/polybar/grayblocks/launch.sh
+exec_always --no-startup-id ~/.config/polybar/setup-1400.sh
 
 # Workspaces config
 exec --no-startup-id xbindkeys
