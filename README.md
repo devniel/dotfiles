@@ -9,6 +9,6 @@ keys you press, the terminal is stuck in the **kitty keyboard protocol**
 ("CSI u" mode). A TUI (usually Claude Code) enabled it and didn't restore
 state on an abrupt exit.
 
-- **Recover:** press `Ctrl+Shift+R` in Ghostty (bound to `reset` in
-  `ubuntu/ghostty/config`), or run `reset` / `printf '\e[<u'` in another
-  terminal.
+- **Recover:** run `reset`, or `printf '\e[<u'`. If input is too garbled to
+  type, open a new Ghostty tab/window (or use its command palette →
+  `Reset`) and close the stuck one.

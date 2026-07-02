@@ -1,9 +1,5 @@
 font-size = 16
 keybind = ctrl+alt+right=unbind
 keybind = ctrl+alt+left=unbind
-# Rescue key: reset the terminal (RIS) when it's left in kitty keyboard
-# protocol / "CSI u" mode — e.g. after Claude Code exits abruptly and keys
-# start emitting garbage like `5;7u`. Works even when the shell input is stuck.
-keybind = ctrl+shift+r=reset
 window-decoration = false
 gtk-titlebar = false
