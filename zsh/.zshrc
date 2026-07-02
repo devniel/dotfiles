@@ -113,3 +113,10 @@ source $HOME/.aliases
 /usr/bin/keychain --nogui $HOME/.ssh/id_rsa_github
 source $HOME/.keychain/$HOSTNAME-sh
 
+# Pop the kitty keyboard protocol before each prompt. Recovers a terminal left
+# in "CSI u" mode (e.g. after Claude Code exits abruptly), where keys emit
+# garbage like `5;7u` instead of characters. No-op when already in normal mode.
+function _reset_kitty_kbd() { printf '\e[<u' 2>/dev/null }
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _reset_kitty_kbd
+
