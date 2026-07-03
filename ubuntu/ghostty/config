@@ -1,4 +1,4 @@
-font-size = 16
+font-size = 28
 keybind = ctrl+alt+right=unbind
 keybind = ctrl+alt+left=unbind
 window-decoration = false
