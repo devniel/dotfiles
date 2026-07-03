@@ -18,3 +18,5 @@ cp $HOME/.config/nitrogen/nitrogen.cfg ./ubuntu/nitrogen/nitrogen.cfg
 # right-side monitor split (black left strip) + login autostart
 cp $HOME/.local/bin/right-screen.sh ./ubuntu/.local/bin/right-screen.sh
 cp $HOME/.xsessionrc ./ubuntu/.xsessionrc
+# manual 4K toggle (not persistent): screen-4k.sh / screen-4k.sh --reset
+cp $HOME/.local/bin/screen-4k.sh ./ubuntu/.local/bin/screen-4k.sh
