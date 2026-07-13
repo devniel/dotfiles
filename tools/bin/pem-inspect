@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+#
+# pem-inspect — inspect (and optionally repair) a PEM key or certificate.
+#
+# PEM files are sometimes flattened onto a single line (markers and body
+# separated by spaces instead of newlines), which every crypto tool rejects
+# with "error decoding pem". This normalizes the PEM first — strips the
+# BEGIN/END markers, removes all whitespace, and re-wraps the base64 body at
+# 64 columns — then routes it to the right inspector based on its label.
+#
+# Prefers `step` (smallstep CLI) when available, falls back to `openssl`.
+#
+# Usage:
+#   pem-inspect <file>          Inspect a key or certificate.
+#   pem-inspect --fix <file>    Print the normalized/re-wrapped PEM to stdout.
+#   pem-inspect --write <file>  Rewrite the file in place with normalized PEM.
+#   cat key | pem-inspect       Read from stdin.
+#
+set -euo pipefail
+
+usage() { sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+
+mode="inspect"
+case "${1:-}" in
+  -h|--help) usage 0 ;;
+  --fix)     mode="fix";   shift ;;
+  --write)   mode="write"; shift ;;
+esac
+
+src="${1:-/dev/stdin}"
+[ "$src" = "/dev/stdin" ] || [ -f "$src" ] || { echo "pem-inspect: no such file: $src" >&2; exit 1; }
+
+content="$(cat -- "$src")"
+
+# Extract the PEM label (e.g. "RSA PRIVATE KEY", "CERTIFICATE") from the BEGIN
+# marker, tolerating the flattened case where body follows on the same line.
+label="$(printf '%s' "$content" | grep -oE 'BEGIN [A-Z0-9 ]+-----' | head -1 | sed -E 's/^BEGIN //; s/-----$//' | sed 's/[[:space:]]*$//')"
+[ -n "$label" ] || { echo "pem-inspect: no PEM BEGIN marker found in input" >&2; exit 1; }
+
+# Normalize: drop markers, strip whitespace, re-wrap base64 at 64 columns.
+# The $(...) drops any trailing newline from the body so the printf below
+# controls line breaks exactly — otherwise the END marker can glue onto the
+# last base64 line.
+normalize() {
+  local body
+  body="$(printf '%s' "$content" \
+    | sed -e "s/-----BEGIN $label-----//g" -e "s/-----END $label-----//g" \
+    | tr -d '[:space:]' \
+    | fold -w 64)"
+  printf -- '-----BEGIN %s-----\n%s\n-----END %s-----\n' "$label" "$body" "$label"
+}
+
+normalized="$(normalize)"
+
+if [ "$mode" = "fix" ]; then
+  printf '%s\n' "$normalized"
+  exit 0
+fi
+
+if [ "$mode" = "write" ]; then
+  [ "$src" != "/dev/stdin" ] || { echo "pem-inspect: --write needs a file, not stdin" >&2; exit 1; }
+  printf '%s\n' "$normalized" > "$src"
+  echo "pem-inspect: rewrote $src ($label)" >&2
+  exit 0
+fi
+
+# Inspect. Route by label: certificates/CSRs vs keys.
+have() { command -v "$1" >/dev/null 2>&1; }
+tmp="$(mktemp -t pem-inspect.XXXXXX)"
+trap 'rm -f "$tmp"' EXIT
+printf '%s\n' "$normalized" > "$tmp"
+
+case "$label" in
+  "CERTIFICATE")
+    if have step; then step certificate inspect "$tmp"
+    else openssl x509 -in "$tmp" -text -noout; fi ;;
+  "CERTIFICATE REQUEST"|"NEW CERTIFICATE REQUEST")
+    if have step; then step certificate inspect --csr "$tmp"
+    else openssl req -in "$tmp" -text -noout; fi ;;
+  "PUBLIC KEY")
+    if have step; then step crypto key inspect "$tmp"
+    else openssl pkey -pubin -in "$tmp" -text -noout; fi ;;
+  *"PRIVATE KEY")   # RSA / EC / OPENSSH / plain PRIVATE KEY
+    if have step; then step crypto key inspect "$tmp"
+    elif [ "$label" = "OPENSSH PRIVATE KEY" ]; then ssh-keygen -y -f "$tmp" >/dev/null && ssh-keygen -l -f "$tmp"
+    else openssl pkey -in "$tmp" -text -noout; fi ;;
+  *)
+    echo "pem-inspect: unknown PEM label '$label' — showing raw normalized PEM:" >&2
+    printf '%s\n' "$normalized" ;;
+esac
