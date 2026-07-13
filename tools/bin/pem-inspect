@@ -11,7 +11,8 @@
 # Prefers `step` (smallstep CLI) when available, falls back to `openssl`.
 #
 # Usage:
-#   pem-inspect <file>          Inspect a key or certificate.
+#   pem-inspect <file>          Summary: type, algorithm, size, fingerprint.
+#   pem-inspect --full <file>   Full dump (modulus, primes — the wall of hex).
 #   pem-inspect --fix <file>    Print the normalized/re-wrapped PEM to stdout.
 #   pem-inspect --write <file>  Rewrite the file in place with normalized PEM.
 #   cat key | pem-inspect       Read from stdin.
@@ -25,6 +26,7 @@ case "${1:-}" in
   -h|--help) usage 0 ;;
   --fix)     mode="fix";   shift ;;
   --write)   mode="write"; shift ;;
+  --full)    mode="full";  shift ;;
 esac
 
 src="${1:-/dev/stdin}"
@@ -70,21 +72,72 @@ tmp="$(mktemp -t pem-inspect.XXXXXX)"
 trap 'rm -f "$tmp"' EXIT
 printf '%s\n' "$normalized" > "$tmp"
 
-case "$label" in
-  "CERTIFICATE")
-    if have step; then step certificate inspect "$tmp"
-    else openssl x509 -in "$tmp" -text -noout; fi ;;
-  "CERTIFICATE REQUEST"|"NEW CERTIFICATE REQUEST")
-    if have step; then step certificate inspect --csr "$tmp"
-    else openssl req -in "$tmp" -text -noout; fi ;;
-  "PUBLIC KEY")
-    if have step; then step crypto key inspect "$tmp"
-    else openssl pkey -pubin -in "$tmp" -text -noout; fi ;;
-  *"PRIVATE KEY")   # RSA / EC / OPENSSH / plain PRIVATE KEY
-    if have step; then step crypto key inspect "$tmp"
-    elif [ "$label" = "OPENSSH PRIVATE KEY" ]; then ssh-keygen -y -f "$tmp" >/dev/null && ssh-keygen -l -f "$tmp"
-    else openssl pkey -in "$tmp" -text -noout; fi ;;
-  *)
-    echo "pem-inspect: unknown PEM label '$label' — showing raw normalized PEM:" >&2
-    printf '%s\n' "$normalized" ;;
-esac
+is_pub=""; [ "$label" = "PUBLIC KEY" ] && is_pub="-pubin"
+
+# --full: the complete dump (modulus, primes, all fields) — the wall of hex.
+full_dump() {
+  case "$label" in
+    "CERTIFICATE")
+      if have step; then step certificate inspect "$tmp"
+      else openssl x509 -in "$tmp" -text -noout; fi ;;
+    "CERTIFICATE REQUEST"|"NEW CERTIFICATE REQUEST")
+      if have step; then step certificate inspect --csr "$tmp"
+      else openssl req -in "$tmp" -text -noout; fi ;;
+    "PUBLIC KEY")
+      if have step; then step crypto key inspect "$tmp"
+      else openssl pkey -pubin -in "$tmp" -text -noout; fi ;;
+    *"PRIVATE KEY")   # RSA / EC / OPENSSH / plain PRIVATE KEY
+      if have step; then step crypto key inspect "$tmp"
+      elif [ "$label" = "OPENSSH PRIVATE KEY" ]; then ssh-keygen -y -f "$tmp" >/dev/null && ssh-keygen -l -f "$tmp"
+      else openssl pkey -in "$tmp" -text -noout; fi ;;
+    *)
+      echo "pem-inspect: unknown PEM label '$label' — showing raw normalized PEM:" >&2
+      printf '%s\n' "$normalized" ;;
+  esac
+}
+
+# summary: a few useful lines instead of the hex dump (the default).
+# The SPKI SHA256 fingerprint is the value you actually compare keys/certs by.
+row() { printf '%-14s %s\n' "$1" "$2"; }
+
+summary() {
+  row "Type:" "$label"
+  case "$label" in
+    "CERTIFICATE")
+      local sub iss nb na
+      sub="$(openssl x509 -in "$tmp" -noout -subject 2>/dev/null | sed 's/^subject=* *//')"
+      iss="$(openssl x509 -in "$tmp" -noout -issuer  2>/dev/null | sed 's/^issuer=* *//')"
+      nb="$(openssl x509 -in "$tmp" -noout -startdate 2>/dev/null | sed 's/^notBefore=//')"
+      na="$(openssl x509 -in "$tmp" -noout -enddate   2>/dev/null | sed 's/^notAfter=//')"
+      [ -n "$sub" ] && row "Subject:" "$sub"
+      [ -n "$iss" ] && row "Issuer:"  "$iss"
+      [ -n "$nb" ]  && row "Not before:" "$nb"
+      [ -n "$na" ]  && row "Not after:"  "$na"
+      local fp spki
+      fp="$(openssl x509 -in "$tmp" -noout -fingerprint -sha256 2>/dev/null | sed 's/^.*=//')"
+      [ -n "$fp" ] && row "SHA256:" "$fp"
+      # SPKI fingerprint of the cert's public key — matches the one printed for
+      # its private key, so you can confirm a key and cert belong together.
+      spki="$(openssl x509 -in "$tmp" -pubkey -noout 2>/dev/null \
+              | openssl pkey -pubin -pubout -outform DER 2>/dev/null \
+              | openssl dgst -sha256 -binary 2>/dev/null | openssl base64 2>/dev/null || true)"
+      [ -n "$spki" ] && row "Public SHA256:" "SHA256:$spki" ;;
+    *)
+      # Keys: algorithm + size from the inspector's header line (no hex).
+      # Capture the whole output first, then slice line 1 — piping a multi-line
+      # producer into `head` would SIGPIPE it and trip pipefail/set -e.
+      local out hdr
+      if have step; then out="$(step crypto key inspect "$tmp" 2>/dev/null || true)"
+      else out="$(openssl pkey $is_pub -in "$tmp" -noout -text 2>/dev/null || true)"; fi
+      hdr="${out%%$'\n'*}"
+      [ -n "$hdr" ] && row "Details:" "$hdr"
+      # SPKI (public-key) SHA256 fingerprint — same for a private key and its
+      # matching public key / cert, so it's how you check they belong together.
+      local spki
+      spki="$(openssl pkey $is_pub -in "$tmp" -pubout -outform DER 2>/dev/null \
+              | openssl dgst -sha256 -binary 2>/dev/null | openssl base64 2>/dev/null || true)"
+      [ -n "$spki" ] && row "Public SHA256:" "SHA256:$spki" ;;
+  esac
+}
+
+if [ "$mode" = "full" ]; then full_dump; else summary; fi

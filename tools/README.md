@@ -18,7 +18,7 @@ here take effect immediately.
 
 | Tool | What it does |
 |------|--------------|
-| [`pem-inspect`](bin/pem-inspect) | Inspect a PEM key or certificate; auto-repairs flattened/single-line PEM first. `--fix` prints the re-wrapped PEM, `--write` fixes the file in place. Prefers [`step`](https://smallstep.com/cli/), falls back to `openssl`. |
+| [`pem-inspect`](bin/pem-inspect) | Summarize a PEM key or certificate (type, algorithm, size, and SPKI fingerprint — a key and its cert show the same one). Auto-repairs flattened/single-line PEM first. `--full` for the complete hex dump, `--fix` prints the re-wrapped PEM, `--write` fixes the file in place. Prefers [`step`](https://smallstep.com/cli/), falls back to `openssl`. |
 
 ## Adding a tool
 
