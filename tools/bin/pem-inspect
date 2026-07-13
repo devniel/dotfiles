@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+#
+# pem-inspect — inspect (and optionally repair) a PEM key or certificate.
+#
+# PEM files are sometimes flattened onto a single line (markers and body
+# separated by spaces instead of newlines), which every crypto tool rejects
+# with "error decoding pem". This normalizes the PEM first — strips the
+# BEGIN/END markers, removes all whitespace, and re-wraps the base64 body at
+# 64 columns — then routes it to the right inspector based on its label.
+#
+# Prefers `step` (smallstep CLI) when available, falls back to `openssl`.
+#
+# Usage:
+#   pem-inspect <file>          Summary: type, algorithm, size, fingerprint.
+#   pem-inspect --full <file>   Full dump (modulus, primes — the wall of hex).
+#   pem-inspect --fix <file>    Print the normalized/re-wrapped PEM to stdout.
+#   pem-inspect --write <file>  Rewrite the file in place with normalized PEM.
+#   cat key | pem-inspect       Read from stdin.
+#
+set -euo pipefail
+
+usage() { sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+
+mode="inspect"
+case "${1:-}" in
+  -h|--help) usage 0 ;;
+  --fix)     mode="fix";   shift ;;
+  --write)   mode="write"; shift ;;
+  --full)    mode="full";  shift ;;
+esac
+
+src="${1:-/dev/stdin}"
+[ "$src" = "/dev/stdin" ] || [ -f "$src" ] || { echo "pem-inspect: no such file: $src" >&2; exit 1; }
+
+content="$(cat -- "$src")"
+
+# Extract the PEM label (e.g. "RSA PRIVATE KEY", "CERTIFICATE") from the BEGIN
+# marker, tolerating the flattened case where body follows on the same line.
+label="$(printf '%s' "$content" | grep -oE 'BEGIN [A-Z0-9 ]+-----' | head -1 | sed -E 's/^BEGIN //; s/-----$//' | sed 's/[[:space:]]*$//')"
+[ -n "$label" ] || { echo "pem-inspect: no PEM BEGIN marker found in input" >&2; exit 1; }
+
+# Normalize: drop markers, strip whitespace, re-wrap base64 at 64 columns.
+# The $(...) drops any trailing newline from the body so the printf below
+# controls line breaks exactly — otherwise the END marker can glue onto the
+# last base64 line.
+normalize() {
+  local body
+  body="$(printf '%s' "$content" \
+    | sed -e "s/-----BEGIN $label-----//g" -e "s/-----END $label-----//g" \
+    | tr -d '[:space:]' \
+    | fold -w 64)"
+  printf -- '-----BEGIN %s-----\n%s\n-----END %s-----\n' "$label" "$body" "$label"
+}
+
+normalized="$(normalize)"
+
+if [ "$mode" = "fix" ]; then
+  printf '%s\n' "$normalized"
+  exit 0
+fi
+
+if [ "$mode" = "write" ]; then
+  [ "$src" != "/dev/stdin" ] || { echo "pem-inspect: --write needs a file, not stdin" >&2; exit 1; }
+  printf '%s\n' "$normalized" > "$src"
+  echo "pem-inspect: rewrote $src ($label)" >&2
+  exit 0
+fi
+
+# Inspect. Route by label: certificates/CSRs vs keys.
+have() { command -v "$1" >/dev/null 2>&1; }
+tmp="$(mktemp -t pem-inspect.XXXXXX)"
+trap 'rm -f "$tmp"' EXIT
+printf '%s\n' "$normalized" > "$tmp"
+
+is_pub=""; [ "$label" = "PUBLIC KEY" ] && is_pub="-pubin"
+
+# --full: the complete dump (modulus, primes, all fields) — the wall of hex.
+full_dump() {
+  case "$label" in
+    "CERTIFICATE")
+      if have step; then step certificate inspect "$tmp"
+      else openssl x509 -in "$tmp" -text -noout; fi ;;
+    "CERTIFICATE REQUEST"|"NEW CERTIFICATE REQUEST")
+      if have step; then step certificate inspect --csr "$tmp"
+      else openssl req -in "$tmp" -text -noout; fi ;;
+    "PUBLIC KEY")
+      if have step; then step crypto key inspect "$tmp"
+      else openssl pkey -pubin -in "$tmp" -text -noout; fi ;;
+    *"PRIVATE KEY")   # RSA / EC / OPENSSH / plain PRIVATE KEY
+      if have step; then step crypto key inspect "$tmp"
+      elif [ "$label" = "OPENSSH PRIVATE KEY" ]; then ssh-keygen -y -f "$tmp" >/dev/null && ssh-keygen -l -f "$tmp"
+      else openssl pkey -in "$tmp" -text -noout; fi ;;
+    *)
+      echo "pem-inspect: unknown PEM label '$label' — showing raw normalized PEM:" >&2
+      printf '%s\n' "$normalized" ;;
+  esac
+}
+
+# summary: a few useful lines instead of the hex dump (the default).
+# The SPKI SHA256 fingerprint is the value you actually compare keys/certs by.
+row() { printf '%-14s %s\n' "$1" "$2"; }
+
+summary() {
+  row "Type:" "$label"
+  case "$label" in
+    "CERTIFICATE")
+      local sub iss nb na
+      sub="$(openssl x509 -in "$tmp" -noout -subject 2>/dev/null | sed 's/^subject=* *//')"
+      iss="$(openssl x509 -in "$tmp" -noout -issuer  2>/dev/null | sed 's/^issuer=* *//')"
+      nb="$(openssl x509 -in "$tmp" -noout -startdate 2>/dev/null | sed 's/^notBefore=//')"
+      na="$(openssl x509 -in "$tmp" -noout -enddate   2>/dev/null | sed 's/^notAfter=//')"
+      [ -n "$sub" ] && row "Subject:" "$sub"
+      [ -n "$iss" ] && row "Issuer:"  "$iss"
+      [ -n "$nb" ]  && row "Not before:" "$nb"
+      [ -n "$na" ]  && row "Not after:"  "$na"
+      local fp spki
+      fp="$(openssl x509 -in "$tmp" -noout -fingerprint -sha256 2>/dev/null | sed 's/^.*=//')"
+      [ -n "$fp" ] && row "SHA256:" "$fp"
+      # SPKI fingerprint of the cert's public key — matches the one printed for
+      # its private key, so you can confirm a key and cert belong together.
+      spki="$(openssl x509 -in "$tmp" -pubkey -noout 2>/dev/null \
+              | openssl pkey -pubin -pubout -outform DER 2>/dev/null \
+              | openssl dgst -sha256 -binary 2>/dev/null | openssl base64 2>/dev/null || true)"
+      [ -n "$spki" ] && row "Public SHA256:" "SHA256:$spki" ;;
+    *)
+      # Keys: algorithm + size from the inspector's header line (no hex).
+      # Capture the whole output first, then slice line 1 — piping a multi-line
+      # producer into `head` would SIGPIPE it and trip pipefail/set -e.
+      local out hdr
+      if have step; then out="$(step crypto key inspect "$tmp" 2>/dev/null || true)"
+      else out="$(openssl pkey $is_pub -in "$tmp" -noout -text 2>/dev/null || true)"; fi
+      hdr="${out%%$'\n'*}"
+      [ -n "$hdr" ] && row "Details:" "$hdr"
+      # SPKI (public-key) SHA256 fingerprint — same for a private key and its
+      # matching public key / cert, so it's how you check they belong together.
+      local spki
+      spki="$(openssl pkey $is_pub -in "$tmp" -pubout -outform DER 2>/dev/null \
+              | openssl dgst -sha256 -binary 2>/dev/null | openssl base64 2>/dev/null || true)"
+      [ -n "$spki" ] && row "Public SHA256:" "SHA256:$spki" ;;
+  esac
+}
+
+if [ "$mode" = "full" ]; then full_dump; else summary; fi
