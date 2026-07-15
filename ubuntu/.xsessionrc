@@ -1,6 +1,7 @@
 # Runs at login (sourced by /etc/X11/Xsession.d/40x11-common_xsessionrc), before i3.
-# Carve the right-side monitor and paint the background black.
-[ -x "$HOME/.local/bin/right-screen.sh" ] && "$HOME/.local/bin/right-screen.sh"
+# Set up the HD panel (native res, full width, polybar) and paint the background black.
+# [ -x "$HOME/.local/bin/right-screen.sh" ] && "$HOME/.local/bin/right-screen.sh"
+[ -x "$HOME/.local/bin/screen-hd.sh" ] && "$HOME/.local/bin/screen-hd.sh"
 
 # Solid-black wallpaper. Generate the image on first use so this is self-contained.
 BG="$HOME/.local/share/black-bg.ppm"
