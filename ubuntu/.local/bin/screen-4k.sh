@@ -17,7 +17,10 @@
 
 set -e
 
-OUTPUT="DP-1"
+# Detect the connected output (panel enumerates as DP-1 or DP-2 depending on
+# port/cable). Prefer the primary, else first connected.
+OUTPUT=$(xrandr | awk '/ connected primary/{print $1; exit}')
+[ -z "$OUTPUT" ] && OUTPUT=$(xrandr | awk '/ connected/{print $1; exit}')
 VNAME="DP-1-right"
 RATE=60
 GB="$HOME/.config/polybar/grayblocks"
