@@ -14,8 +14,8 @@
 # and run that. The tracked config.ini stays as the 1080p original.
 #
 # Usage:
-#   screen-4k.sh          native res, full-screen, polybar full-width (2x bar/fonts)
-#   screen-4k.sh --reset  back to login default (1080p + right-side strip)
+#   screen-native.sh          native res, full-screen, polybar full-width (2x bar/fonts)
+#   screen-native.sh --reset  back to login default (1080p + right-side strip)
 
 set -e
 

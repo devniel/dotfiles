@@ -2,7 +2,7 @@
 # Ensure the connected HD panel (native 1920x1080) is set correctly and
 # polybar is running at 1x sizing.
 #
-# Unlike screen-4k.sh (which needs a virtual monitor carve + 2x polybar config
+# Unlike screen-native.sh (which needs a virtual monitor carve + 2x polybar config
 # because polybar can't scale itself), this panel is already native 1920x1080
 # and polybar's config.ini binds to the primary output (monitor = empty), full
 # width. So there's no carving and no config scaling to do here - just (re)apply
