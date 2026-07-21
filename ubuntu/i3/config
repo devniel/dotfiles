@@ -183,7 +183,9 @@ bindsym $mod+r mode "resize"
 #        status_command i3status
 #}
 
-exec_always --no-startup-id ~/.config/polybar/setup-1400.sh
+# Full-width polybar (was: setup-1400.sh, which created a 1400px virtual
+# monitor DP-1-right and left a ~520px gap on the left). Launch the bar directly.
+#exec_always --no-startup-id ~/.config/polybar/launch.sh --grayblocks
 
 # Workspaces config
 exec --no-startup-id xbindkeys
@@ -200,4 +202,4 @@ bindsym $mod+g exec ghostty
 bindsym $mod+b exec google-chrome
 
 # Picom (animation effects)
-exec --no-startup-id picom --config ~/.config/picom/picom.conf
+#exec --no-startup-id picom --config ~/.config/picom/picom.conf
