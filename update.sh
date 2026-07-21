@@ -9,6 +9,8 @@ cp $HOME/.config/i3/config ./ubuntu/i3/config
 cp $HOME/.config/i3/ws-next.sh ./ubuntu/i3/ws-next.sh
 cp $HOME/.config/i3/ws-prev.sh ./ubuntu/i3/ws-prev.sh
 cp $HOME/.config/ghostty/config ./ubuntu/ghostty/config
+# yazi file manager (install via ubuntu/apps/install.sh)
+cp $HOME/.config/yazi/yazi.toml ./ubuntu/yazi/yazi.toml
 # polybar: only the customized grayblocks files (see ubuntu/polybar/README.md)
 cp $HOME/.config/polybar/grayblocks/config.ini ./ubuntu/polybar/grayblocks/config.ini
 cp $HOME/.config/polybar/grayblocks/colors.ini ./ubuntu/polybar/grayblocks/colors.ini
