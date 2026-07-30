@@ -1,0 +1,13 @@
+[Unit]
+Description=Disable TSO/GSO on eno1 (I219-V e1000e TX hang workaround)
+Documentation=https://bugzilla.kernel.org/show_bug.cgi?id=196197
+After=sys-subsystem-net-devices-eno1.device
+BindsTo=sys-subsystem-net-devices-eno1.device
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/ethtool -K eno1 tso off gso off
+
+[Install]
+WantedBy=sys-subsystem-net-devices-eno1.device

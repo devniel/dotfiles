@@ -1,0 +1,12 @@
+[Unit]
+Description=Recover eno1 from e1000e TX hardware unit hang
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/e1000e-watchdog.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
