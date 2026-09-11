@@ -200,6 +200,8 @@ bindsym $mod+minus scratchpad show
 # Shortcuts
 bindsym $mod+g exec ghostty
 bindsym $mod+b exec google-chrome
+# Screenshot: select an area (or click a window) and copy it to the clipboard as PNG
+bindsym Print exec --no-startup-id maim -s -u | xclip -selection clipboard -t image/png
 
 # Picom (animation effects)
 #exec --no-startup-id picom --config ~/.config/picom/picom.conf
