@@ -30,6 +30,7 @@ Idempotent — re-running upgrades each app to its current release.
 | [azure-cli](https://learn.microsoft.com/cli/azure/) | Azure command line (`az`). | `aka.ms` script → apt repo | — |
 | [vscode](https://code.visualstudio.com/) | Editor. | direct `.deb` (MS) | — |
 | [google-chrome](https://www.google.com/chrome/) | Browser. | direct `.deb` (Google) | — |
+| [cursor](https://cursor.com/) | AI code editor. | `custom:install_cursor` — resolves the current `.deb` via Cursor's download API | — |
 | [paseo](https://github.com/getpaseo/paseo) | Paseo desktop app (Electron). | own script, [`paseo.sh`](paseo.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 | [github-copilot](https://github.com/github/app) | GitHub Copilot desktop app (Tauri). | own script, [`github-copilot.sh`](github-copilot.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 
@@ -39,6 +40,9 @@ Idempotent — re-running upgrades each app to its current release.
   symlinks `~/.local/bin/fd -> fdfind` to bridge this.
 - ghostty's `.deb` is release-specific (`amd64_24.04.deb`); the `{UBUNTU}`
   token in its spec is filled from `/etc/os-release` at install time.
+- cursor's `.deb` asset URL is content-hashed and changes every release, so it
+  can't use `debfile:` like vscode/chrome. `install_cursor` asks
+  `cursor.com/api/download` for the current one instead.
 - Apps that need more than one step get their own script in this directory,
   wired in with `local:file.sh`. Each one also runs on its own
   (e.g. `./ubuntu/apps/paseo.sh`).
