@@ -23,6 +23,9 @@ CFG="$GB/config.ini"
 
 xrandr --output "$OUTPUT" --mode 1920x1080 --rate "$RATE"
 
+# 1x UI scaling (undoes screen-native.sh's 2x). Apps read it when they start.
+printf 'Xft.dpi: 96\nXcursor.size: 24\n' | xrdb -merge
+
 # Clean up any stale carved virtual monitor from older setups (leftover
 # "*-right" carve leaves a gap since the real monitor is DP-2 full-width).
 xrandr --delmonitor DP-1-right >/dev/null 2>&1 || true

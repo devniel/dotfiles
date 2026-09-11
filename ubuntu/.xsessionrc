@@ -1,7 +1,8 @@
 # Runs at login (sourced by /etc/X11/Xsession.d/40x11-common_xsessionrc), before i3.
-# Set up the HD panel (native res, full width, polybar) and paint the background black.
+# Set up the 4K panel (native res, 2x scaling, full width, polybar) and paint the background black.
+# Runs before i3 starts, so i3 picks up the 2x Xft.dpi too. For 1080p/1x use screen-hd.sh instead.
 # [ -x "$HOME/.local/bin/right-screen.sh" ] && "$HOME/.local/bin/right-screen.sh"
-[ -x "$HOME/.local/bin/screen-hd.sh" ] && "$HOME/.local/bin/screen-hd.sh"
+[ -x "$HOME/.local/bin/screen-native.sh" ] && "$HOME/.local/bin/screen-native.sh"
 
 # Solid-black wallpaper. Generate the image on first use so this is self-contained.
 BG="$HOME/.local/share/black-bg.ppm"
