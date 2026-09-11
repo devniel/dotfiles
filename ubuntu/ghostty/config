@@ -1,4 +1,5 @@
 font-size = 28
+theme = Catppuccin Latte
 keybind = ctrl+alt+right=unbind
 keybind = ctrl+alt+left=unbind
 keybind = ctrl+shift+w=close_surface
