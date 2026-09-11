@@ -41,6 +41,7 @@ declare -A APPS=(
   [terraform]="custom:install_terraform"
   [vscode]="debfile:https://update.code.visualstudio.com/latest/linux-deb-x64/stable"
   [google-chrome]="debfile:https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+  [cursor]="custom:install_cursor"
   [paseo]="local:paseo.sh"
   [github-copilot]="local:github-copilot.sh"
 )
@@ -77,6 +78,20 @@ install_flatpak() {
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   echo ":: $name — flatpak install $appid"
   flatpak install -y --noninteractive flathub "$appid"
+}
+
+# Cursor (editor) doesn't publish a stable "latest" .deb URL like vscode/chrome
+# do — each release's asset URL is content-hashed. Ask its download API for the
+# current one instead.
+install_cursor() {
+  echo ":: cursor — resolving latest .deb from Cursor's download API"
+  local url
+  url=$(curl -fsSL 'https://cursor.com/api/download?platform=linux-x64&releaseTrack=stable' \
+        | grep -oE '"debUrl":"[^"]+"' | cut -d'"' -f4)
+  [ -z "$url" ] && { echo "!! cursor — couldn't resolve a .deb URL; skipping" >&2; return 1; }
+  local tmp; tmp="$(mktemp -d)"
+  echo ":: cursor — downloading $(basename "$url")"
+  curl -fsSL -o "$tmp/pkg.deb" "$url"; dpkg_install "$tmp/pkg.deb"; rm -rf "$tmp"
 }
 
 # HashiCorp apt repo (terraform, and any other hashicorp tool).
