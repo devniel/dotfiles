@@ -20,7 +20,9 @@ cp $HOME/.config/nitrogen/nitrogen.cfg ./ubuntu/nitrogen/nitrogen.cfg
 # right-side monitor split (black left strip) + login autostart
 cp $HOME/.local/bin/right-screen.sh ./ubuntu/.local/bin/right-screen.sh
 cp $HOME/.xsessionrc ./ubuntu/.xsessionrc
-# manual native-resolution toggle (not persistent): screen-native.sh / screen-native.sh --reset
+# font rendering (UI scaling is set by screen-native.sh / screen-hd.sh)
+cp $HOME/.Xresources ./ubuntu/.Xresources
+# login default, native res + 2x scaling (run from .xsessionrc): screen-native.sh / screen-native.sh --reset
 cp $HOME/.local/bin/screen-native.sh ./ubuntu/.local/bin/screen-native.sh
-# HD default (auto-detects the connected output): screen-hd.sh
+# 1080p at 1x (auto-detects the connected output): screen-hd.sh
 cp $HOME/.local/bin/screen-hd.sh ./ubuntu/.local/bin/screen-hd.sh

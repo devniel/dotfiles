@@ -1,0 +1,6 @@
+! Font rendering. UI scaling (Xft.dpi, Xcursor.size) is set per display mode by
+! ~/.local/bin/screen-native.sh (2x, login default) and screen-hd.sh (1x).
+Xft.antialias: true
+Xft.hinting: true
+Xft.hintstyle: hintslight
+Xft.rgba: rgb
