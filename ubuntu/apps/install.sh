@@ -16,13 +16,14 @@
 #   script:URL                       vendor curl|sh installer (self-sudos)
 #   script-sudo:URL                  vendor curl|sudo bash installer
 #   flatpak:app.id                   Flathub app
-#   appimage:owner/repo:asset-substring
-#                                    latest GitHub AppImage -> ~/Applications + app menu entry
+#   local:file.sh                    script next to this one, for apps with more steps
 #   custom:function                  bespoke installer defined below
 #
 set -euo pipefail
 
 . /etc/os-release  # provides $VERSION_ID (24.04) and $VERSION_CODENAME (noble)
+
+APPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 declare -A APPS=(
   # terminal / CLI
@@ -40,25 +41,19 @@ declare -A APPS=(
   [terraform]="custom:install_terraform"
   [vscode]="debfile:https://update.code.visualstudio.com/latest/linux-deb-x64/stable"
   [google-chrome]="debfile:https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
-  [paseo]="appimage:getpaseo/paseo:x86_64.AppImage"
+  [paseo]="local:paseo.sh"
 )
 
 # dpkg may fail on missing deps; apt -f resolves them (yazi pulls fd/rg/fzf/...).
 dpkg_install() { sudo dpkg -i "$1" || sudo apt-get install -f -y; }
 
-# Download URL of the first asset in a repo's latest GitHub release whose name
-# contains the given substring.
-latest_asset_url() {
-  curl -fsSL "https://api.github.com/repos/$1/releases/latest" \
-    | grep -oE '"browser_download_url": *"[^"]+"' | cut -d'"' -f4 \
-    | grep -F "$2" | head -1
-}
-
 install_deb() {
   local name="$1" repo="$2" match="${3//\{UBUNTU\}/$VERSION_ID}"
   echo ":: $name — resolving latest .deb from $repo (match: $match)"
   local url
-  url=$(latest_asset_url "$repo" "$match")
+  url=$(curl -fsSL "https://api.github.com/repos/$repo/releases/latest" \
+        | grep -oE '"browser_download_url": *"[^"]+"' | cut -d'"' -f4 \
+        | grep -F "$match" | head -1)
   [ -z "$url" ] && { echo "!! $name — no asset matching '$match'; skipping" >&2; return 1; }
   local tmp; tmp="$(mktemp -d)"
   echo ":: $name — downloading $(basename "$url")"
@@ -73,6 +68,7 @@ install_debfile() {
 
 install_script()      { echo ":: $1 — running $2"; curl -fsSL "$2" | sh; }
 install_script_sudo() { echo ":: $1 — running $2 (sudo)"; curl -fsSL "$2" | sudo bash; }
+install_local()       { echo ":: $1 — running $2"; bash "$APPS_DIR/$2"; }
 
 install_flatpak() {
   local name="$1" appid="$2"
@@ -80,53 +76,6 @@ install_flatpak() {
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   echo ":: $name — flatpak install $appid"
   flatpak install -y --noninteractive flathub "$appid"
-}
-
-# Latest GitHub AppImage into ~/Applications under its release asset name
-# (versionless, so re-running upgrades in place), plus an app menu entry.
-install_appimage() {
-  local name="$1" repo="$2" match="$3"
-  echo ":: $name — resolving latest AppImage from $repo (match: $match)"
-  local url
-  url=$(latest_asset_url "$repo" "$match")
-  [ -z "$url" ] && { echo "!! $name — no asset matching '$match'; skipping" >&2; return 1; }
-  # AppImages need FUSE 2 to run (libfuse2t64 on 24.04, libfuse2 before that).
-  ldconfig -p | grep 'libfuse\.so\.2 ' >/dev/null \
-    || sudo apt-get install -y libfuse2t64 || sudo apt-get install -y libfuse2
-  local dir="$HOME/Applications" file
-  file="$dir/$(basename "$url")"
-  mkdir -p "$dir"
-  echo ":: $name — downloading $(basename "$url")"
-  curl -fsSL -o "$file.part" "$url"; chmod +x "$file.part"; mv "$file.part" "$file"
-  appimage_menu_entry "$name" "$file"
-}
-
-# Build ~/.local/share/applications/<name>.desktop from the AppImage's own
-# .desktop file and icon, with Exec pointed at the AppImage (keeping its flags,
-# e.g. Electron's --no-sandbox) so it shows up in rofi/app menus.
-appimage_menu_entry() {
-  local name="$1" file="$2" tmp; tmp="$(mktemp -d)"
-  local root="$tmp/squashfs-root" icons="$HOME/.local/share/icons" apps="$HOME/.local/share/applications"
-  ( cd "$tmp" && "$file" --appimage-extract '*.desktop' >/dev/null && "$file" --appimage-extract .DirIcon >/dev/null )
-  # .DirIcon is usually a symlink into usr/share/icons; extract its target too.
-  local icon_src icon
-  if [ -L "$root/.DirIcon" ]; then
-    icon_src=$(readlink "$root/.DirIcon")
-    ( cd "$tmp" && "$file" --appimage-extract "$icon_src" >/dev/null )
-    icon="$icons/$name.${icon_src##*.}"
-    icon_src="$root/$icon_src"
-  else
-    icon_src="$root/.DirIcon"
-    icon="$icons/$name.png"
-  fi
-  local desktops=("$root"/*.desktop)
-  mkdir -p "$icons" "$apps"
-  cp "$icon_src" "$icon"
-  sed -E -e "s|^Exec=[^ ]+|Exec=$file|" -e "s|^Icon=.*|Icon=$icon|" -e '/^TryExec=/d' \
-    "${desktops[0]}" > "$apps/$name.desktop"
-  if command -v update-desktop-database >/dev/null 2>&1; then update-desktop-database "$apps"; fi
-  rm -rf "$tmp"
-  echo ":: $name — menu entry $apps/$name.desktop"
 }
 
 # HashiCorp apt repo (terraform, and any other hashicorp tool).
@@ -150,7 +99,7 @@ install_app() {
     script)      install_script      "$name" "$rest" ;;
     script-sudo) install_script_sudo "$name" "$rest" ;;
     flatpak)     install_flatpak     "$name" "$rest" ;;
-    appimage)    install_appimage    "$name" "${rest%%:*}" "${rest#*:}" ;;
+    local)       install_local       "$name" "$rest" ;;
     custom)      "$rest" ;;
     *)           echo "!! $name — unknown method '$method'" >&2; return 1 ;;
   esac
