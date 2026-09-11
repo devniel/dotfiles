@@ -16,11 +16,14 @@
 #   script:URL                       vendor curl|sh installer (self-sudos)
 #   script-sudo:URL                  vendor curl|sudo bash installer
 #   flatpak:app.id                   Flathub app
+#   local:file.sh                    script next to this one, for apps with more steps
 #   custom:function                  bespoke installer defined below
 #
 set -euo pipefail
 
 . /etc/os-release  # provides $VERSION_ID (24.04) and $VERSION_CODENAME (noble)
+
+APPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 declare -A APPS=(
   # terminal / CLI
@@ -38,6 +41,7 @@ declare -A APPS=(
   [terraform]="custom:install_terraform"
   [vscode]="debfile:https://update.code.visualstudio.com/latest/linux-deb-x64/stable"
   [google-chrome]="debfile:https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+  [paseo]="local:paseo.sh"
 )
 
 # dpkg may fail on missing deps; apt -f resolves them (yazi pulls fd/rg/fzf/...).
@@ -64,6 +68,7 @@ install_debfile() {
 
 install_script()      { echo ":: $1 — running $2"; curl -fsSL "$2" | sh; }
 install_script_sudo() { echo ":: $1 — running $2 (sudo)"; curl -fsSL "$2" | sudo bash; }
+install_local()       { echo ":: $1 — running $2"; bash "$APPS_DIR/$2"; }
 
 install_flatpak() {
   local name="$1" appid="$2"
@@ -84,13 +89,17 @@ install_terraform() {
 }
 
 install_app() {
-  local name="$1" spec="${APPS[$1]}" method="${spec%%:*}" rest="${spec#*:}"
+  # spec must be its own `local`: words in one `local` are all expanded before
+  # any is assigned, so method/rest would read an unset spec (fatal under set -u).
+  local name="$1" spec="${APPS[$1]}"
+  local method="${spec%%:*}" rest="${spec#*:}"
   case "$method" in
     deb)         install_deb         "$name" "${rest%%:*}" "${rest#*:}" ;;
     debfile)     install_debfile     "$name" "$rest" ;;
     script)      install_script      "$name" "$rest" ;;
     script-sudo) install_script_sudo "$name" "$rest" ;;
     flatpak)     install_flatpak     "$name" "$rest" ;;
+    local)       install_local       "$name" "$rest" ;;
     custom)      "$rest" ;;
     *)           echo "!! $name — unknown method '$method'" >&2; return 1 ;;
   esac

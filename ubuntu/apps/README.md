@@ -30,6 +30,7 @@ Idempotent — re-running upgrades each app to its current release.
 | [azure-cli](https://learn.microsoft.com/cli/azure/) | Azure command line (`az`). | `aka.ms` script → apt repo | — |
 | [vscode](https://code.visualstudio.com/) | Editor. | direct `.deb` (MS) | — |
 | [google-chrome](https://www.google.com/chrome/) | Browser. | direct `.deb` (Google) | — |
+| [paseo](https://github.com/getpaseo/paseo) | Paseo desktop app (Electron). | own script, [`paseo.sh`](paseo.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 
 ## Notes
 
@@ -37,10 +38,19 @@ Idempotent — re-running upgrades each app to its current release.
   symlinks `~/.local/bin/fd -> fdfind` to bridge this.
 - ghostty's `.deb` is release-specific (`amd64_24.04.deb`); the `{UBUNTU}`
   token in its spec is filled from `/etc/os-release` at install time.
+- Apps that need more than one step get their own script in this directory,
+  wired in with `local:file.sh`. Each one also runs on its own
+  (e.g. `./ubuntu/apps/paseo.sh`).
+- [`paseo.sh`](paseo.sh) puts the AppImage in `~/Applications` under the
+  release asset's name, so re-running replaces the old version in place. It
+  makes sure FUSE 2 (`libfuse2t64`) is present, which AppImages need to run.
+  It then writes `~/.local/share/applications/paseo.desktop` from the
+  AppImage's own `.desktop` file and icon, keeping its launch flags (Electron's
+  `--no-sandbox`), so Paseo shows up in the rofi launcher (**≡** on the bar).
 - Adding an app: add a `name="method:spec"` entry to the `APPS` map in
   [`install.sh`](install.sh) and a row above. Methods:
   `deb:owner/repo:asset`, `debfile:URL`, `script:URL`, `script-sudo:URL`,
-  `flatpak:app.id`, `custom:function`.
+  `flatpak:app.id`, `local:file.sh`, `custom:function`.
 
 ## Left out on purpose
 
