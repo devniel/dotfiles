@@ -42,6 +42,7 @@ declare -A APPS=(
   [vscode]="debfile:https://update.code.visualstudio.com/latest/linux-deb-x64/stable"
   [google-chrome]="debfile:https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
   [paseo]="local:paseo.sh"
+  [github-copilot]="local:github-copilot.sh"
 )
 
 # dpkg may fail on missing deps; apt -f resolves them (yazi pulls fd/rg/fzf/...).

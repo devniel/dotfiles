@@ -31,6 +31,7 @@ Idempotent — re-running upgrades each app to its current release.
 | [vscode](https://code.visualstudio.com/) | Editor. | direct `.deb` (MS) | — |
 | [google-chrome](https://www.google.com/chrome/) | Browser. | direct `.deb` (Google) | — |
 | [paseo](https://github.com/getpaseo/paseo) | Paseo desktop app (Electron). | own script, [`paseo.sh`](paseo.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
+| [github-copilot](https://github.com/github/app) | GitHub Copilot desktop app (Tauri). | own script, [`github-copilot.sh`](github-copilot.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 
 ## Notes
 
@@ -41,12 +42,15 @@ Idempotent — re-running upgrades each app to its current release.
 - Apps that need more than one step get their own script in this directory,
   wired in with `local:file.sh`. Each one also runs on its own
   (e.g. `./ubuntu/apps/paseo.sh`).
-- [`paseo.sh`](paseo.sh) puts the AppImage in `~/Applications` under the
-  release asset's name, so re-running replaces the old version in place. It
-  makes sure FUSE 2 (`libfuse2t64`) is present, which AppImages need to run.
-  It then writes `~/.local/share/applications/paseo.desktop` from the
-  AppImage's own `.desktop` file and icon, keeping its launch flags (Electron's
-  `--no-sandbox`), so Paseo shows up in the rofi launcher (**≡** on the bar).
+- AppImage apps ([`paseo.sh`](paseo.sh), [`github-copilot.sh`](github-copilot.sh))
+  are one `appimage_install owner/repo asset name` call into the shared
+  [`lib/appimage.sh`](lib/appimage.sh). It puts the AppImage in
+  `~/Applications` under the release asset's name, so re-running replaces the
+  old version in place, and makes sure FUSE 2 (`libfuse2t64`) is present, which
+  AppImages need to run. It then writes `~/.local/share/applications/<name>.desktop`
+  from the AppImage's own `.desktop` file and icon (following symlinks inside
+  the AppImage), keeping its launch flags such as Electron's `--no-sandbox`, so
+  the app shows up in the rofi launcher (**≡** on the bar).
 - Adding an app: add a `name="method:spec"` entry to the `APPS` map in
   [`install.sh`](install.sh) and a row above. Methods:
   `deb:owner/repo:asset`, `debfile:URL`, `script:URL`, `script-sudo:URL`,
