@@ -84,9 +84,9 @@ set_workspace_switch_buttons() {
 ratbagctl "$MOUSE" profile 1 enable
 set_base_layout 1
 set_workspace_switch_buttons 1
-# button 1: plain click (empirically the one that should NOT carry the macro
-# below - see the button-index note above).
-ratbagctl "$MOUSE" profile 1 button 1 action set button 3
+# button 1: plain middle click (empirically the one that should NOT carry
+# the macro below - see the button-index note above).
+ratbagctl "$MOUSE" profile 1 button 1 action set button 2
 # button 2: opens the GNOME Activities overview. NOT a bare Super tap
 # (+KEY_LEFTMETA -KEY_LEFTMETA): GNOME/Mutter's bare-modifier-tap detection
 # doesn't reliably fire for a mouse's synthetic keypress even though it's a
