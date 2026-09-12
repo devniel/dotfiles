@@ -33,6 +33,7 @@ Idempotent — re-running upgrades each app to its current release.
 | [cursor](https://cursor.com/) | AI code editor. | `custom:install_cursor` — resolves the current `.deb` via Cursor's download API | — |
 | [paseo](https://github.com/getpaseo/paseo) | Paseo desktop app (Electron). | own script, [`paseo.sh`](paseo.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 | [github-copilot](https://github.com/github/app) | GitHub Copilot desktop app (Tauri). | own script, [`github-copilot.sh`](github-copilot.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
+| [openpets](https://github.com/OpenPetsHQ/openpets) | Local-first animated desktop pet with agent integrations (Claude Code, OpenCode, Cursor, Pi, MCP). | own script, [`openpets.sh`](openpets.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 
 ## Notes
 
