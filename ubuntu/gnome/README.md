@@ -33,7 +33,7 @@ until Shell has actually loaded the extensions once.
 ## What's here
 
 - **`extensions/install.sh`** — installs everything: the official
-  `gnome-shell-extensions` bundle + Ubuntu Dock via `apt`, three manually
+  `gnome-shell-extensions` bundle + Ubuntu Dock via `apt`, four manually
   packaged extensions from extensions.gnome.org (not in Ubuntu's repos), and
   Pop Shell built from source (also not packaged for non-Pop!_OS systems).
 - **`settings.sh`** — every `gsettings`/`dconf` customization made on top:
@@ -51,6 +51,7 @@ until Shell has actually loaded the extensions once.
 | [Ubuntu Dock](https://gitlab.gnome.org/GNOME/gnome-shell-extensions) | `apt` (`gnome-shell-extension-ubuntu-dock`) | Persistent dock — vanilla GNOME only shows one inside the Activities overview. `multi-monitor` is turned on so it shows on every screen. |
 | [Improved Workspace Indicator](https://extensions.gnome.org/extension/3968/improved-workspace-indicator/) | manual (extensions.gnome.org) | Top-bar workspace indicator styled like i3/sway — shows current *and* in-use workspaces, not just a bare number. |
 | [Switch workspaces on active monitor](https://extensions.gnome.org/extension/4586/switch-workspaces-on-active-monitor/) | manual (extensions.gnome.org) | GNOME's native multi-monitor modes are "every screen switches together" or "secondary screens are frozen" — neither is what you want. This one fakes independent per-monitor switching by reassigning windows on the active monitor to a different workspace slot, without touching the real global workspace index. Bound to `Ctrl+Alt+Left/Right` to match the mouse's Piper profile (see `../mouse/`). |
+| [Reorder Workspaces](https://extensions.gnome.org/extension/3685/reorder-workspaces/) | manual (extensions.gnome.org) | Move the *current* workspace's position in the sequence — the actual macOS "drag a Space to reorder it" equivalent, distinct from moving a window between workspaces. Rebound to `Ctrl+Shift+Super+Up/Down`; its default `Ctrl+Super+Up/Down` collides with Pop Shell's `switch-to-workspace-up/down`. |
 | [Pop Shell](https://github.com/pop-os/shell) | built from source (`master_noble` branch) | Real automatic tiling window manager — the actual "Amethyst for GNOME" ask. Not on extensions.gnome.org; System76's own install path for non-Pop!_OS GNOME. Community-maintained, not actively developed by System76 any more, but this is their own current official instructions. |
 
 ### Deliberately not installed

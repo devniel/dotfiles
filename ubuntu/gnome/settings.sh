@@ -28,6 +28,7 @@ gsettings set org.gnome.shell enabled-extensions "$(python3 -c "print([
     'system-monitor@gnome-shell-extensions.gcampax.github.com',
     'user-theme@gnome-shell-extensions.gcampax.github.com',
     'improved-workspace-indicator@michaelaquilina.github.io',
+    'reorder-workspaces@jer.dev',
 ])")"
 
 # --- custom app launchers (matches i3's $mod+g / $mod+b) --------------------
@@ -106,6 +107,18 @@ gsettings --schemadir "$EXT_DIR/$SIM_UUID/schemas/" set $SIM_SCHEMA \
   switch-to-next-workspace-on-active-monitor "['<Control><Alt>Right']"
 gsettings --schemadir "$EXT_DIR/$SIM_UUID/schemas/" set $SIM_SCHEMA \
   switch-to-previous-workspace-on-active-monitor "['<Control><Alt>Left']"
+
+# reorder-workspaces: move the *current* workspace's position in the
+# sequence (the actual "drag a macOS Space to reorder it" equivalent - not
+# moving a window between workspaces, which is a different shortcut
+# entirely). Default is Ctrl+Super+Up/Down, which collides with
+# switch-to-workspace-up/down set by Pop Shell's migration above.
+REORDER_UUID="reorder-workspaces@jer.dev"
+REORDER_SCHEMA="org.gnome.shell.extensions.reorder-workspaces"
+gsettings --schemadir "$EXT_DIR/$REORDER_UUID/schemas" set $REORDER_SCHEMA \
+  move-workspace-prev "['<Control><Shift><Super>Up']"
+gsettings --schemadir "$EXT_DIR/$REORDER_UUID/schemas" set $REORDER_SCHEMA \
+  move-workspace-next "['<Control><Shift><Super>Down']"
 
 # Also remove the same accelerator from GNOME's own built-in workspace-switch
 # keys - two consumers claiming an identical accelerator means one of them

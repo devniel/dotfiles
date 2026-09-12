@@ -65,6 +65,7 @@ print(v['pk'] if v else '')
 
 install_manual_extension "improved-workspace-indicator@michaelaquilina.github.io"
 install_manual_extension "simulate-switching-workspaces-on-active-monitor@micheledaros.com"
+install_manual_extension "reorder-workspaces@jer.dev"
 
 # --- Pop Shell (built from source) ------------------------------------------
 
