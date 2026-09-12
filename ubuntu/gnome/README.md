@@ -81,6 +81,14 @@ until Shell has actually loaded the extensions once.
   finding button 2 silently carrying the leftover macro afterward). Always
   re-run `ratbagctl <device> profile N get` after changing a button and check
   every button, not just the one you touched.
+- **`ratbagctl profile active get` lies if you don't restart `ratbagd`
+  first.** After calling `profile active set N` yourself, a later plain
+  `active get` can still report the *previous* profile — which made an
+  already-correct button mapping look broken all over again, twice, while
+  chasing this. `sudo systemctl restart ratbagd` before trusting a read;
+  don't restart it again right after your own `set` if you want that value
+  trusted (see `../mouse/g502-hero-profiles.sh` for the fuller version of
+  this note).
 
 ## Mouse profiles
 
