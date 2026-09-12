@@ -44,6 +44,7 @@ declare -A APPS=(
   [cursor]="custom:install_cursor"
   [paseo]="local:paseo.sh"
   [github-copilot]="local:github-copilot.sh"
+  [openpets]="local:openpets.sh"
 )
 
 # dpkg may fail on missing deps; apt -f resolves them (yazi pulls fd/rg/fzf/...).
