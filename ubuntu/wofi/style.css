@@ -1,0 +1,43 @@
+* { font-family: "Inter", sans-serif; font-size: 15px; }
+
+window {
+    background-color: transparent;
+}
+
+#outer-box, #inner-box { background: transparent; }
+
+#outer-box {
+    background-color: rgba(18, 21, 28, 0.94);
+    border: 1px solid #232833;
+    border-radius: 14px;
+    padding: 12px;
+}
+
+#input {
+    background-color: #0b0d12;
+    color: #d7dae0;
+    border: 1px solid #232833;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    box-shadow: none;
+}
+
+#input:focus { border-color: #7aa2f7; }
+
+#scroll { margin: 0; }
+
+#entry {
+    padding: 8px 10px;
+    border-radius: 9px;
+    color: #a9b1bd;
+}
+
+#entry:selected {
+    background-color: #1a1e27;
+    color: #d7dae0;
+    outline: none;
+}
+
+#text { margin-left: 10px; }
+#text:selected { color: #d7dae0; }

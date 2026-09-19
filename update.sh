@@ -26,3 +26,17 @@ cp $HOME/.Xresources ./ubuntu/.Xresources
 cp $HOME/.local/bin/screen-native.sh ./ubuntu/.local/bin/screen-native.sh
 # 1080p at 1x (auto-detects the connected output): screen-hd.sh
 cp $HOME/.local/bin/screen-hd.sh ./ubuntu/.local/bin/screen-hd.sh
+
+# hyprland desktop (see ubuntu/hyprland/README.md): compositor config + the apps it launches
+cp $HOME/.config/hypr/hyprland.conf ./ubuntu/hyprland/hyprland.conf
+cp $HOME/.config/hypr/monitors.conf ./ubuntu/hyprland/monitors.conf
+cp $HOME/.config/hypr/hyprpaper.conf ./ubuntu/hyprland/hyprpaper.conf
+cp $HOME/.config/hypr/hypridle.conf ./ubuntu/hyprland/hypridle.conf
+cp $HOME/.config/hypr/hyprlock.conf ./ubuntu/hyprland/hyprlock.conf
+cp $HOME/hyprland-build/build.sh ./ubuntu/hyprland/build.sh
+cp $HOME/.config/waybar/config.jsonc ./ubuntu/waybar/config.jsonc
+cp $HOME/.config/waybar/style.css ./ubuntu/waybar/style.css
+cp $HOME/.config/wofi/config ./ubuntu/wofi/config
+cp $HOME/.config/wofi/style.css ./ubuntu/wofi/style.css
+cp $HOME/.config/mako/config ./ubuntu/mako/config
+cp $HOME/.config/kitty/kitty.conf ./ubuntu/kitty/kitty.conf
