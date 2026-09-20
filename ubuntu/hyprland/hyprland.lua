@@ -57,6 +57,13 @@ hl.animation({
     bezier = "smooth",
     style = "popin 92%",
 })
+-- windowsMove also drives the hyprexpo overview zoom; speed is in 1/10 s, lower = faster
+hl.animation({
+    leaf = "windowsMove",
+    enabled = true,
+    speed = 2,
+    bezier = "smooth",
+})
 hl.animation({
     leaf = "fade",
     enabled = true,
@@ -179,6 +186,9 @@ hl.config({
 hl.bind(var_mod .. " + TAB", function()
     hl.plugin.hyprexpo.expo("toggle")
 end)
+-- The G502's middle button sends Super+Tab from a macro stored on the mouse (Piper, profile 2).
+-- Not a mouse:274 bind: while the overview is open hyprexpo consumes every mouse click and
+-- selects the hovered space, but it ignores key presses, so Super+Tab closes without switching.
 hl.gesture({
     fingers = 4,
     direction = "up",

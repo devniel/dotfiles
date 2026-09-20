@@ -100,6 +100,16 @@ Workspace switching has no animation (`animation = workspaces, 0`); set
 
 ## Notes
 
+- Logitech G502: the middle button opens/closes the overview by sending `Super+Tab` from a
+  macro stored on the mouse itself (not in these files). Recreate it with
+  `ratbagctl <device> profile 2 button 2 action set macro +KEY_LEFTMETA KEY_TAB -KEY_LEFTMETA`
+  (`ratbagctl list` shows the device name; Piper's macro editor does the same). It has to be
+  a key press, not a `mouse:274` bind: while the overview is open hyprexpo consumes every
+  mouse click and selects the hovered space, but it ignores key presses, so `Super+Tab`
+  closes it without switching. Undo with `... action set button 3`.
+- Overview speed: the zoom uses Hyprland's `windowsMove` animation (`speed = 2` in
+  `hyprland.lua`, lower is faster). It also speeds up window move/resize.
+
 - Window buttons (minimize/maximize/close) are hidden in GTK and libadwaita apps with
   `button-layout ':'` (gsettings) plus `gtk-decoration-layout=:` in the two `ubuntu/gtk`
   files. Close windows with `Super+Q`. Chrome, Firefox and Electron draw their own buttons
