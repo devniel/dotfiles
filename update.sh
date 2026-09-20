@@ -36,8 +36,6 @@ cp $HOME/.config/hypr/hyprlock.conf ./ubuntu/hyprland/hyprlock.conf
 cp $HOME/hyprland-build/build.sh ./ubuntu/hyprland/build.sh
 cp $HOME/.config/waybar/config.jsonc ./ubuntu/waybar/config.jsonc
 cp $HOME/.config/waybar/style.css ./ubuntu/waybar/style.css
-cp $HOME/.config/wofi/config ./ubuntu/wofi/config
-cp $HOME/.config/wofi/style.css ./ubuntu/wofi/style.css
 cp $HOME/.config/rofi/config.rasi ./ubuntu/rofi/config.rasi
 cp $HOME/.config/mako/config ./ubuntu/mako/config
 cp $HOME/.config/kitty/kitty.conf ./ubuntu/kitty/kitty.conf
