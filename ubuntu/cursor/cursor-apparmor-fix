@@ -1,0 +1,40 @@
+#!/bin/sh
+# Re-applies the two AppArmor edits Cursor's sandbox needs on Ubuntu 26.04 (AppArmor 4):
+#   - enable `userns,`               (shipped commented out)
+#   - add `capability dac_override,` (newuidmap/newgidmap are denied it otherwise)
+# The Cursor package overwrites /etc/apparmor.d/cursor-sandbox on every upgrade, so this runs
+# from an apt hook (/etc/apt/apt.conf.d/99cursor-apparmor-fix). It is idempotent: it only
+# touches the file, and reloads the profile, when an edit is actually missing.
+#
+# Overrides for testing: CURSOR_PROFILE=<path> and NO_RELOAD=1.
+set -eu
+
+PROFILE="${CURSOR_PROFILE:-/etc/apparmor.d/cursor-sandbox}"
+[ -f "$PROFILE" ] || exit 0
+
+TMP="$(mktemp)"
+trap 'rm -f "$TMP"' EXIT
+
+# 1) uncomment userns; 2) add dac_override right after each `capability setpcap,` unless the
+# next line already has it.
+sed 's/^  #userns,$/  userns,/' "$PROFILE" | awk '
+    { print }
+    /^  capability setpcap,$/ {
+        if ((getline nxt) > 0) {
+            if (nxt !~ /dac_override/) print "  capability dac_override,"
+            print nxt
+        } else {
+            print "  capability dac_override,"
+        }
+    }' > "$TMP"
+
+if cmp -s "$PROFILE" "$TMP"; then
+    exit 0
+fi
+
+cat "$TMP" > "$PROFILE"          # keep the file's owner and mode
+echo "cursor-apparmor-fix: patched $PROFILE"
+
+if [ -z "${NO_RELOAD:-}" ]; then
+    apparmor_parser -r "$PROFILE" && echo "cursor-apparmor-fix: profile reloaded"
+fi

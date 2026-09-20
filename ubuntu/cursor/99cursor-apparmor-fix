@@ -1,0 +1,3 @@
+// Reapply the Cursor sandbox AppArmor edits after every dpkg run (see cursor-apparmor-fix).
+// "|| true" so a failure here can never make apt report an error.
+DPkg::Post-Invoke { "if [ -x /usr/local/sbin/cursor-apparmor-fix ]; then /usr/local/sbin/cursor-apparmor-fix || true; fi"; };
