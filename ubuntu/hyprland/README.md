@@ -4,7 +4,7 @@ Daily desktop on Ubuntu 26.04: **Hyprland built from source** into `/opt/hyprlan
 (Ubuntu's package lags upstream by a few minor versions), "dark minimal" look
 (bg `#0b0d12`, surface `#12151c`, text `#d7dae0`, accent `#7aa2f7`).
 
-Related folders: `../waybar`, `../wofi`, `../mako`, `../kitty` (all launched by Hyprland).
+Related folders: `../waybar`, `../rofi`, `../mako`, `../kitty` (all launched by Hyprland).
 
 ## Restore on a new machine
 
@@ -20,8 +20,8 @@ Related folders: `../waybar`, `../wofi`, `../mako`, `../kitty` (all launched by 
    The wayland, wayland-protocols and re2 apt versions are too old, so it builds those too.
 
 2. Install the helper apps (kept from apt): `waybar mako-notifier hypridle hyprlock hyprpaper
-   wofi kitty hyprpolkitagent network-manager-gnome blueman pavucontrol cliphist hyprpicker
-   nautilus nwg-displays nwg-look grim slurp wl-clipboard brightnessctl playerctl`.
+   rofi kitty hyprpolkitagent network-manager-gnome blueman pavucontrol cliphist hyprpicker
+   nautilus nwg-displays nwg-look grim slurp wl-clipboard brightnessctl playerctl papirus-icon-theme`.
    Mask the user services the packages enable globally, since Hyprland starts them itself:
 
    ```bash
@@ -31,10 +31,10 @@ Related folders: `../waybar`, `../wofi`, `../mako`, `../kitty` (all launched by 
 3. Config files (paths under `~/.config`):
 
    ```bash
-   mkdir -p ~/.config/{hypr,waybar,wofi,mako,kitty}
+   mkdir -p ~/.config/{hypr,waybar,rofi,mako,kitty}
    cp ubuntu/hyprland/{hyprland,monitors,hyprpaper,hypridle,hyprlock}.conf ~/.config/hypr/
    cp ubuntu/waybar/* ~/.config/waybar/
-   cp ubuntu/wofi/*   ~/.config/wofi/
+   cp ubuntu/rofi/config.rasi ~/.config/rofi/config.rasi
    cp ubuntu/mako/config ~/.config/mako/config
    cp ubuntu/kitty/kitty.conf ~/.config/kitty/kitty.conf
    ubuntu/hyprland/make-wallpaper.sh
@@ -74,7 +74,7 @@ Related folders: `../waybar`, `../wofi`, `../mako`, `../kitty` (all launched by 
 | Keys | Action |
 |---|---|
 | `Super+Return` | terminal (kitty) |
-| `Super+Space` / `Super+D` | launcher (wofi) |
+| Tap `Super`, `Super+Space` or `Super+D` | launcher (rofi, DarkBlue theme + Papirus-Dark icons) |
 | `Super+Tab` or 4-finger swipe up | overview of all spaces (drag windows between them) |
 | `Ctrl+Alt+←/→` or 4-finger swipe | switch space (add `Shift` to carry the window) |
 | `Super+1..0` / `Super+Shift+1..0` | go to / send window to space 1-10 |
