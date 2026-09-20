@@ -28,8 +28,9 @@ cp $HOME/.local/bin/screen-native.sh ./ubuntu/.local/bin/screen-native.sh
 cp $HOME/.local/bin/screen-hd.sh ./ubuntu/.local/bin/screen-hd.sh
 
 # hyprland desktop (see ubuntu/hyprland/README.md): compositor config + the apps it launches
-cp $HOME/.config/hypr/hyprland.conf ./ubuntu/hyprland/hyprland.conf
-cp $HOME/.config/hypr/monitors.conf ./ubuntu/hyprland/monitors.conf
+cp $HOME/.config/hypr/hyprland.lua ./ubuntu/hyprland/hyprland.lua
+cp $HOME/.config/hypr/monitors.lua ./ubuntu/hyprland/monitors.lua
+cp $HOME/.config/hypr/hyprland-gui.lua ./ubuntu/hyprland/hyprland-gui.lua
 cp $HOME/.config/hypr/hyprpaper.conf ./ubuntu/hyprland/hyprpaper.conf
 cp $HOME/.config/hypr/hypridle.conf ./ubuntu/hyprland/hypridle.conf
 cp $HOME/.config/hypr/hyprlock.conf ./ubuntu/hyprland/hyprlock.conf
