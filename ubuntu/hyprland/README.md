@@ -38,6 +38,10 @@ previous bar and notifier, kept only as a fallback. The compositor config is Lua
    cp ubuntu/hyprland/{hyprland,monitors,hyprland-gui}.lua ~/.config/hypr/
    cp ubuntu/hyprland/{hyprpaper,hypridle,hyprlock}.conf ~/.config/hypr/
    cp ubuntu/rofi/config.rasi ~/.config/rofi/config.rasi
+   mkdir -p ~/.config/gtk-3.0 ~/.config/gtk-4.0
+   cp ubuntu/gtk/gtk-3.0/settings.ini ~/.config/gtk-3.0/settings.ini
+   cp ubuntu/gtk/gtk-4.0/settings.ini ~/.config/gtk-4.0/settings.ini
+   gsettings set org.gnome.desktop.wm.preferences button-layout ':'
    cp ubuntu/kitty/kitty.conf ~/.config/kitty/kitty.conf
    ubuntu/hyprland/make-wallpaper.sh
    ```
@@ -89,19 +93,27 @@ previous bar and notifier, kept only as a fallback. The compositor config is Lua
 | `Super+Q` `Super+F` `Super+V` | close, fullscreen, float |
 | `Super+L` | lock screen (idle: lock 10 min, screens off 15 min) |
 | `Super+C` / `Super+P` | clipboard history (cliphist + rofi) / colour picker |
-| `Super+E` / `Super+A` | files / volume mixer |
+| `Super+E` / `Super+B` / `Super+A` | files / Chrome / volume mixer |
 
 Workspace switching has no animation (`animation = workspaces, 0`); set
 `animation = workspaces, 1, 3, smooth, slide` to bring the slide back.
 
 ## Notes
 
+- Window buttons (minimize/maximize/close) are hidden in GTK and libadwaita apps with
+  `button-layout ':'` (gsettings) plus `gtk-decoration-layout=:` in the two `ubuntu/gtk`
+  files. Close windows with `Super+Q`. Chrome, Firefox and Electron draw their own buttons
+  and need their own setting (Chrome: right-click the tab bar, "Use system title bar and
+  borders").
 - Validate the Lua config without restarting: `Hyprland --verify-config -c ~/.config/hypr/hyprland.lua`.
   A Lua error stops the rest of the file from running, so check it before logging out.
   (It prints "unknown config key plugin.hyprexpo.*" because plugins are not loaded in that
   mode; that is expected.)
 - Migrating `.conf` to Lua left `gesture ... dispatcher` and the `Super+Tab` plugin bind
-  broken; both are fixed in `hyprland.lua` (plugin dispatchers go through `hyprctl dispatch`).
+  broken; both are fixed in `hyprland.lua`. In Lua mode `hyprctl dispatch` takes Lua syntax, so
+  `hyprctl dispatch hyprexpo:expo toggle` does not work; call the plugin's Lua function
+  instead: `hl.plugin.hyprexpo.expo("toggle")`. Test a plugin call without a keypress with
+  `hyprctl eval "hl.plugin.hyprexpo.expo('toggle')"`.
 - `hyprlock.conf` is written but was never test-locked.
 - `xdg-desktop-portal-hyprland` is still the apt build (screen sharing).
 - `hyprpm` does not work on this setup (its sudo header install leaves root-owned files

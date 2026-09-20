@@ -141,6 +141,7 @@ hl.bind("Print", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | wl-copy"))
 hl.bind(var_mod .. " + C", hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy"))
 hl.bind(var_mod .. " + P", hl.dsp.exec_cmd("hyprpicker -a"))
 hl.bind(var_mod .. " + E", hl.dsp.exec_cmd("nautilus"))
+hl.bind(var_mod .. " + B", hl.dsp.exec_cmd("google-chrome-stable"))
 hl.bind(var_mod .. " + A", hl.dsp.exec_cmd("pavucontrol"))
 
 -- More spaces
@@ -175,12 +176,14 @@ hl.config({
     },
 })
 
-hl.bind(var_mod .. " + TAB", hl.dsp.exec_cmd("hyprctl dispatch hyprexpo:expo toggle"))
+hl.bind(var_mod .. " + TAB", function()
+    hl.plugin.hyprexpo.expo("toggle")
+end)
 hl.gesture({
     fingers = 4,
     direction = "up",
     action = function()
-        hl.dispatch(hl.dsp.exec_cmd("hyprctl dispatch hyprexpo:expo toggle"))
+        hl.plugin.hyprexpo.expo("toggle")
     end,
 })
 

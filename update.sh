@@ -40,3 +40,6 @@ cp $HOME/.config/waybar/style.css ./ubuntu/waybar/style.css
 cp $HOME/.config/rofi/config.rasi ./ubuntu/rofi/config.rasi
 cp $HOME/.config/mako/config ./ubuntu/mako/config
 cp $HOME/.config/kitty/kitty.conf ./ubuntu/kitty/kitty.conf
+# GTK: hide window buttons (see ubuntu/hyprland/README.md)
+cp $HOME/.config/gtk-3.0/settings.ini ./ubuntu/gtk/gtk-3.0/settings.ini
+cp $HOME/.config/gtk-4.0/settings.ini ./ubuntu/gtk/gtk-4.0/settings.ini
