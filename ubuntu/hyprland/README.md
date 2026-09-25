@@ -24,7 +24,9 @@ previous bar and notifier, kept only as a fallback. The compositor config is Lua
 
 2. Install the helper apps (kept from apt): `hypridle hyprlock hyprpaper
    rofi kitty hyprpolkitagent network-manager-gnome blueman pavucontrol cliphist hyprpicker
-   nautilus nwg-displays nwg-look grim slurp wl-clipboard brightnessctl playerctl papirus-icon-theme`.
+   nautilus nwg-look grim slurp wl-clipboard brightnessctl playerctl papirus-icon-theme`.
+   Install nwg-displays (monitor layout) from GitHub, not apt, since the apt build can't
+   write the Lua config: `ubuntu/apps/install.sh nwg-displays`.
    Mask the user services the packages enable globally, since Hyprland starts them itself:
 
    ```bash
@@ -47,7 +49,8 @@ previous bar and notifier, kept only as a fallback. The compositor config is Lua
    ```
 
    `monitors.lua` is separate on purpose: `hyprland.lua` loads it with `require("monitors")`.
-   Edit the monitor names and scale there for a different machine. `hyprland-gui.lua` is
+   nwg-displays overwrites it on Apply (arrange the screens, Apply, done). On a different
+   machine, run it once or edit the monitor names and scale by hand. `hyprland-gui.lua` is
    HyprMod's own file (empty until you save something in it); `hyprland.lua` requires it, so
    it must exist.
 
