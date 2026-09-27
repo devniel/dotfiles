@@ -2,12 +2,18 @@
 # Google Chrome launcher for the nuc (shadows /usr/bin/google-chrome-stable via PATH; the
 # .desktop override calls this too).
 #
-# Hyprland doesn't yet implement xdg-dialog-v1 dialog centering correctly: it advertises
-# the wrong global name and its fallback "smart placement" drops dialogs in a screen
-# corner instead of over their parent window (hyprwm/Hyprland#9498, #2830, #3335). Under
-# native Wayland this makes every Chrome dialog (file picker, print preview, permission
-# prompts, JS alert/confirm) render detached from the browser while the page still shows
-# its own dim/scrim overlay as if a modal is open - looks like the dialog "went missing".
-# XWayland's mature transient-for parenting sidesteps this entirely (same fix as
-# ~/.local/bin/cursor, for an unrelated reason there).
+# - Hide the NVIDIA EGL/GLX/Vulkan drivers: after the eGPU is unplugged the nvidia driver
+#   stays loaded but wedged (dmesg: "nvidia-modeset: ERROR: GPU:0: Error while waiting for
+#   GPU progress"), and libglvnd prefers its EGL vendor file (10_nvidia.json sorts before
+#   50_mesa.json) by default. Without hiding it, Chrome's GPU process picks nvidia, the GL
+#   context never actually renders, and windows come up mapped but fully transparent.
+#   Chrome renders on the Intel iGPU instead. Same fix as ~/.local/bin/cursor.
+# - Run under XWayland (--ozone-platform=x11): Hyprland doesn't correctly implement
+#   xdg-dialog-v1 dialog centering (hyprwm/Hyprland#9498), so Chrome's dialogs (file
+#   picker, print preview, permission prompts, JS alert/confirm) render detached from the
+#   browser under native Wayland while the page still dims as if a modal opened.
+export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+export VK_DRIVER_FILES=/usr/share/vulkan/icd.d/intel_icd.json
+export VK_ICD_FILENAMES="$VK_DRIVER_FILES"
 exec /usr/bin/google-chrome-stable --ozone-platform=x11 "$@"
