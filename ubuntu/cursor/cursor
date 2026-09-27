@@ -1,0 +1,15 @@
+#!/bin/sh
+# Cursor launcher for the nuc (shadows /usr/bin/cursor via PATH; the .desktop override calls this too).
+# - Hide the NVIDIA EGL/GLX/Vulkan drivers: after the eGPU is unplugged the nvidia driver stays loaded
+#   but wedged, and opening it blocks forever in nvkms_open_common, hanging Cursor's GPU process
+#   (gray or never-mapped windows). Cursor renders on the Intel iGPU instead.
+# - Run under XWayland (--ozone-platform=x11).
+# `cursor agent ...` is passed through untouched.
+if [ "$1" = "agent" ]; then
+	exec /usr/share/cursor/bin/cursor "$@"
+fi
+export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+export VK_DRIVER_FILES=/usr/share/vulkan/icd.d/intel_icd.json
+export VK_ICD_FILENAMES="$VK_DRIVER_FILES"
+exec /usr/share/cursor/bin/cursor --ozone-platform=x11 "$@"

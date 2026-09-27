@@ -43,3 +43,7 @@ cp $HOME/.config/kitty/kitty.conf ./ubuntu/kitty/kitty.conf
 # GTK: hide window buttons (see ubuntu/hyprland/README.md)
 cp $HOME/.config/gtk-3.0/settings.ini ./ubuntu/gtk/gtk-3.0/settings.ini
 cp $HOME/.config/gtk-4.0/settings.ini ./ubuntu/gtk/gtk-4.0/settings.ini
+
+# cursor: launcher that hides the (possibly wedged) nvidia drivers + runs under XWayland (see ubuntu/cursor/README.md)
+cp $HOME/.local/bin/cursor ./ubuntu/cursor/cursor
+cp $HOME/.local/share/applications/cursor.desktop ./ubuntu/cursor/cursor.desktop
