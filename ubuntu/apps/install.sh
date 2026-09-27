@@ -42,6 +42,7 @@ declare -A APPS=(
   [vscode]="debfile:https://update.code.visualstudio.com/latest/linux-deb-x64/stable"
   [google-chrome]="debfile:https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
   [cursor]="custom:install_cursor"
+  [nwg-displays]="custom:install_nwg_displays"
   [paseo]="local:paseo.sh"
   [github-copilot]="local:github-copilot.sh"
 )
@@ -92,6 +93,26 @@ install_cursor() {
   local tmp; tmp="$(mktemp -d)"
   echo ":: cursor — downloading $(basename "$url")"
   curl -fsSL -o "$tmp/pkg.deb" "$url"; dpkg_install "$tmp/pkg.deb"; rm -rf "$tmp"
+}
+
+# nwg-displays (monitor layout GUI). Ubuntu's apt build (0.3.x) only writes
+# monitors.conf, which Hyprland's Lua config ignores; 0.4.3+ writes monitors.lua.
+# pipx into ~/.local, reusing the system's GTK/PyGObject/i3ipc bindings.
+install_nwg_displays() {
+  local tag raw
+  tag=$(curl -fsSL https://api.github.com/repos/nwg-piotr/nwg-displays/releases/latest \
+        | grep -oE '"tag_name": *"[^"]+"' | cut -d'"' -f4)
+  [ -z "$tag" ] && { echo "!! nwg-displays — couldn't resolve the latest tag; skipping" >&2; return 1; }
+  raw="https://raw.githubusercontent.com/nwg-piotr/nwg-displays/$tag"
+  echo ":: nwg-displays — pipx install $tag"
+  sudo apt-get install -y pipx python3-gi python3-i3ipc gir1.2-gtk-3.0 gir1.2-gtklayershell-0.1
+  dpkg -s nwg-displays >/dev/null 2>&1 && sudo apt-get remove -y nwg-displays
+  pipx install --force --python /usr/bin/python3 --system-site-packages \
+    "git+https://github.com/nwg-piotr/nwg-displays@$tag"
+  # pipx doesn't install the app menu entry or icon
+  mkdir -p "$HOME/.local/share/applications" "$HOME/.local/share/icons/hicolor/scalable/apps"
+  curl -fsSL -o "$HOME/.local/share/applications/nwg-displays.desktop" "$raw/nwg-displays.desktop"
+  curl -fsSL -o "$HOME/.local/share/icons/hicolor/scalable/apps/nwg-displays.svg" "$raw/nwg-displays.svg"
 }
 
 # HashiCorp apt repo (terraform, and any other hashicorp tool).

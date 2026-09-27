@@ -31,6 +31,7 @@ Idempotent — re-running upgrades each app to its current release.
 | [vscode](https://code.visualstudio.com/) | Editor. | direct `.deb` (MS) | — |
 | [google-chrome](https://www.google.com/chrome/) | Browser. | direct `.deb` (Google) | — |
 | [cursor](https://cursor.com/) | AI code editor. | `custom:install_cursor` — resolves the current `.deb` via Cursor's download API | — |
+| [nwg-displays](https://github.com/nwg-piotr/nwg-displays) | Monitor layout GUI (Hyprland/sway). | `custom:install_nwg_displays` — latest GitHub tag via `pipx` into `~/.local`, replacing the apt build | `ubuntu/hyprland/monitors.lua` |
 | [paseo](https://github.com/getpaseo/paseo) | Paseo desktop app (Electron). | own script, [`paseo.sh`](paseo.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 | [github-copilot](https://github.com/github/app) | GitHub Copilot desktop app (Tauri). | own script, [`github-copilot.sh`](github-copilot.sh): GitHub AppImage → `~/Applications` + app menu entry | — |
 
@@ -43,6 +44,11 @@ Idempotent — re-running upgrades each app to its current release.
 - cursor's `.deb` asset URL is content-hashed and changes every release, so it
   can't use `debfile:` like vscode/chrome. `install_cursor` asks
   `cursor.com/api/download` for the current one instead.
+- nwg-displays comes from GitHub, not apt: Ubuntu's 0.3.x only writes
+  `monitors.conf`, which Hyprland's Lua config never reads, so Apply silently
+  does nothing. 0.4.3+ writes `~/.config/hypr/monitors.lua`. It is installed
+  with `pipx --system-site-packages` so it reuses the apt GTK/PyGObject/i3ipc
+  bindings, and the apt package is removed so the two don't clash.
 - Apps that need more than one step get their own script in this directory,
   wired in with `local:file.sh`. Each one also runs on its own
   (e.g. `./ubuntu/apps/paseo.sh`).
