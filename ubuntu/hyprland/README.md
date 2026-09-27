@@ -24,7 +24,8 @@ previous bar and notifier, kept only as a fallback. The compositor config is Lua
 
 2. Install the helper apps (kept from apt): `hypridle hyprlock hyprpaper
    rofi kitty hyprpolkitagent network-manager-gnome blueman pavucontrol cliphist hyprpicker
-   nautilus nwg-look grim slurp wl-clipboard brightnessctl playerctl papirus-icon-theme`.
+   nautilus nwg-look grim slurp wl-clipboard brightnessctl playerctl papirus-icon-theme
+   easyeffects calf-plugins lsp-plugins-lv2 mda-lv2`.
    Install nwg-displays (monitor layout) from GitHub, not apt, since the apt build can't
    write the Lua config: `ubuntu/apps/install.sh nwg-displays`.
    Mask the user services the packages enable globally, since Hyprland starts them itself:
@@ -94,6 +95,7 @@ previous bar and notifier, kept only as a fallback. The compositor config is Lua
 | `Super+1..0` / `Super+Shift+1..0` | go to / send window to space 1-10 |
 | `Super+N` / `Super+Shift+N` | new empty space (with the window) |
 | `Super+Q` `Super+F` `Super+V` | close, fullscreen, float |
+| `Super+M` / `Super+Shift+M` | minimize focused window (special workspace scratchpad) / show-hide it |
 | `Super+L` | lock screen (idle: lock 10 min, screens off 15 min) |
 | `Super+C` / `Super+P` | clipboard history (cliphist + rofi) / colour picker |
 | `Super+E` / `Super+B` / `Super+A` | files / Chrome / volume mixer |
