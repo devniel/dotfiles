@@ -1,0 +1,13 @@
+#!/bin/sh
+# Google Chrome launcher for the nuc (shadows /usr/bin/google-chrome-stable via PATH; the
+# .desktop override calls this too).
+#
+# Hyprland doesn't yet implement xdg-dialog-v1 dialog centering correctly: it advertises
+# the wrong global name and its fallback "smart placement" drops dialogs in a screen
+# corner instead of over their parent window (hyprwm/Hyprland#9498, #2830, #3335). Under
+# native Wayland this makes every Chrome dialog (file picker, print preview, permission
+# prompts, JS alert/confirm) render detached from the browser while the page still shows
+# its own dim/scrim overlay as if a modal is open - looks like the dialog "went missing".
+# XWayland's mature transient-for parenting sidesteps this entirely (same fix as
+# ~/.local/bin/cursor, for an unrelated reason there).
+exec /usr/bin/google-chrome-stable --ozone-platform=x11 "$@"
