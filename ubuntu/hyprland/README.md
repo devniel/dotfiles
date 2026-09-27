@@ -95,7 +95,6 @@ previous bar and notifier, kept only as a fallback. The compositor config is Lua
 | `Super+1..0` / `Super+Shift+1..0` | go to / send window to space 1-10 |
 | `Super+N` / `Super+Shift+N` | new empty space (with the window) |
 | `Super+Q` `Super+F` `Super+V` | close, fullscreen, float |
-| `Super+M` / `Super+Shift+M` | minimize focused window (special workspace scratchpad) / show-hide it |
 | `Super+L` | lock screen (idle: lock 10 min, screens off 15 min) |
 | `Super+C` / `Super+P` | clipboard history (cliphist + rofi) / colour picker |
 | `Super+E` / `Super+B` / `Super+A` | files / Chrome / volume mixer |
